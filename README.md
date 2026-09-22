@@ -41,9 +41,11 @@ RideLink is a backend ride-sharing system developed using Spring Boot microservi
 
 ## Team Members
 
-| Member                  | Service        | Branch                    |
-| ----------------------- | -------------- | ------------------------- |
-| Member 1 — Group Leader | To be assigned | `feature/leader-service`  |
-| Member 2                | To be assigned | `feature/member2-service` |
-| Member 3                | To be assigned | `feature/member3-service` |
-| Member 4                | To be assigned | `feature/member4-service` |
+### Team Responsibilities & Branches
+
+| Member | Service | Working Branch |
+| :--- | :--- | :--- |
+| **Ruchi** *(Group Leader)* | `ride-management-service` | `feature/ride-management-service` |
+| **Teshi** | `driver-vehicle-service` | `feature/driver-vehicle-service` |
+| **Chamudi** | `fare-payment-service` | `feature/fare-payment-service` |
+| **Ranuda** | `account-service` | `feature/account-service` |
