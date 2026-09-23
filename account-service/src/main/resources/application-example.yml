@@ -1,0 +1,13 @@
+spring:
+  application:
+    name: account-service
+  data:
+    mongodb:
+      uri: "mongodb+srv://<username>:<password>@account-db.u2fxpoc.mongodb.net/account-db?retryWrites=true&w=majority&appName=account-db"
+
+jwt:
+  secret: ${JWT_SECRET:cmlkZWxpbmsxMjM0NTY3ODkxMDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI=}
+  expiration: 3600000
+
+server:
+  port: 8081
