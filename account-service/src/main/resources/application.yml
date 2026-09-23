@@ -1,9 +1,14 @@
 spring:
+
   application:
     name: account-service
   data:
     mongodb:
       uri: "mongodb+srv://it24100688_db_user:urAbAz3iMIz6ydmZ@account-db.u2fxpoc.mongodb.net/account-db?retryWrites=true&w=majority&appName=account-db"
-
+  jwt:
+    secret: ${JWT_SECRET}
+    expiration: 3600000
 server:
   port: 8081
+
+

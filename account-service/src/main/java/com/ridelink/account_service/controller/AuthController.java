@@ -1,5 +1,7 @@
 package com.ridelink.account_service.controller;
 
+import com.ridelink.account_service.dto.LoginRequest;
+import com.ridelink.account_service.dto.LoginResponse;
 import com.ridelink.account_service.dto.RegisterRequest;
 import com.ridelink.account_service.dto.RegisterResponse;
 import com.ridelink.account_service.model.User;
@@ -39,6 +41,26 @@ public class AuthController {
                 .status(HttpStatus.CREATED)
                 .body(response);
     }
+
+    @PostMapping("/login")
+public ResponseEntity<LoginResponse> login(
+        @Valid @RequestBody LoginRequest request) {
+
+    User user = accountService.authenticateUser(
+            request.getEmail(),
+            request.getPassword()
+    );
+
+    LoginResponse response = new LoginResponse(
+            user.getId(),
+            user.getName(),
+            user.getEmail(),
+            user.getRole(),
+            user.getStatus()
+    );
+
+    return ResponseEntity.ok(response);
+}
 
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<String> handleIllegalArgumentException(IllegalArgumentException ex) {
