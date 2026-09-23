@@ -10,19 +10,22 @@ public class LoginResponse {
     private String email;
     private Role role;
     private AccountStatus status;
+    private String token;
 
     public LoginResponse(
             String id,
             String name,
             String email,
             Role role,
-            AccountStatus status) {
+            AccountStatus status,
+            String token) {
 
         this.id = id;
         this.name = name;
         this.email = email;
         this.role = role;
         this.status = status;
+        this.token = token;
     }
 
     public String getId() {
@@ -43,5 +46,9 @@ public class LoginResponse {
 
     public AccountStatus getStatus() {
         return status;
+    }
+
+    public String getToken() {
+        return token;
     }
 }

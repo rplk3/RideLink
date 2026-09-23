@@ -5,6 +5,7 @@ import com.ridelink.account_service.dto.LoginResponse;
 import com.ridelink.account_service.dto.RegisterRequest;
 import com.ridelink.account_service.dto.RegisterResponse;
 import com.ridelink.account_service.model.User;
+import com.ridelink.account_service.security.JwtService;
 import com.ridelink.account_service.service.AccountService;
 
 import jakarta.validation.Valid;
@@ -18,9 +19,11 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final AccountService accountService;
+    private final JwtService jwtService;
 
-    public AuthController(AccountService accountService) {
+    public AuthController(AccountService accountService, JwtService jwtService) {
         this.accountService = accountService;
+        this.jwtService = jwtService;
     }
 
     @PostMapping("/register")
@@ -43,24 +46,31 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-public ResponseEntity<LoginResponse> login(
-        @Valid @RequestBody LoginRequest request) {
+    public ResponseEntity<LoginResponse> login(
+            @Valid @RequestBody LoginRequest request) {
 
-    User user = accountService.authenticateUser(
-            request.getEmail(),
-            request.getPassword()
-    );
+        User user = accountService.authenticateUser(
+                request.getEmail(),
+                request.getPassword()
+        );
 
-    LoginResponse response = new LoginResponse(
-            user.getId(),
-            user.getName(),
-            user.getEmail(),
-            user.getRole(),
-            user.getStatus()
-    );
+        String token = jwtService.generateToken(
+                user.getId(),
+                user.getEmail(),
+                user.getRole().name()
+        );
 
-    return ResponseEntity.ok(response);
-}
+        LoginResponse response = new LoginResponse(
+                user.getId(),
+                user.getName(),
+                user.getEmail(),
+                user.getRole(),
+                user.getStatus(),
+                token
+        );
+
+        return ResponseEntity.ok(response);
+    }
 
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<String> handleIllegalArgumentException(IllegalArgumentException ex) {
