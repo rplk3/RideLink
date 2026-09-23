@@ -1,5 +1,8 @@
 package com.ridelink.account_service.service;
 
+import com.ridelink.account_service.dto.RegisterRequest;
+import com.ridelink.account_service.model.AccountStatus;
+import com.ridelink.account_service.model.User;
 import com.ridelink.account_service.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -16,5 +19,28 @@ public class AccountService {
     ) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+    }
+
+    public User registerUser(RegisterRequest request) {
+
+        if (userRepository.existsByEmail(request.getEmail())) {
+            throw new IllegalArgumentException(
+                    "Email is already registered"
+            );
+        }
+
+        String hashedPassword = passwordEncoder.encode(
+                request.getPassword()
+        );
+
+        User user = new User();
+
+        user.setName(request.getName());
+        user.setEmail(request.getEmail());
+        user.setPassword(hashedPassword);
+        user.setRole(request.getRole());
+        user.setStatus(AccountStatus.ACTIVE);
+
+        return userRepository.save(user);
     }
 }
