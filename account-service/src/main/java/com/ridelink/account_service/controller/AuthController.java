@@ -18,64 +18,68 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/auth")
 public class AuthController {
 
-    private final AccountService accountService;
-    private final JwtService jwtService;
+        private final AccountService accountService;
+        private final JwtService jwtService;
 
-    public AuthController(AccountService accountService, JwtService jwtService) {
-        this.accountService = accountService;
-        this.jwtService = jwtService;
-    }
+        public AuthController(AccountService accountService, JwtService jwtService) {
+                this.accountService = accountService;
+                this.jwtService = jwtService;
+        }
 
-    @PostMapping("/register")
-    public ResponseEntity<RegisterResponse> register(
-            @Valid @RequestBody RegisterRequest request) {
+        @PostMapping("/register")
+        public ResponseEntity<RegisterResponse> register(
+                        @Valid @RequestBody RegisterRequest request) {
 
-        User user = accountService.registerUser(request);
+                User user = accountService.registerUser(request);
 
-        RegisterResponse response = new RegisterResponse(
-                user.getId(),
-                user.getName(),
-                user.getEmail(),
-                user.getRole(),
-                user.getStatus()
-        );
+                RegisterResponse response = new RegisterResponse(
+                                user.getId(),
+                                user.getName(),
+                                user.getEmail(),
+                                user.getRole(),
+                                user.getStatus());
 
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(response);
-    }
+                return ResponseEntity
+                                .status(HttpStatus.CREATED)
+                                .body(response);
+        }
 
-    @PostMapping("/login")
-    public ResponseEntity<LoginResponse> login(
-            @Valid @RequestBody LoginRequest request) {
+        @PostMapping("/login")
+        public ResponseEntity<LoginResponse> login(
+                        @Valid @RequestBody LoginRequest request) {
 
-        User user = accountService.authenticateUser(
-                request.getEmail(),
-                request.getPassword()
-        );
+                User user = accountService.authenticateUser(
+                                request.getEmail(),
+                                request.getPassword());
 
-        String token = jwtService.generateToken(
-                user.getId(),
-                user.getEmail(),
-                user.getRole().name()
-        );
+                String token = jwtService.generateToken(
+                                user.getId(),
+                                user.getEmail(),
+                                user.getRole().name());
 
-        LoginResponse response = new LoginResponse(
-                user.getId(),
-                user.getName(),
-                user.getEmail(),
-                user.getRole(),
-                user.getStatus(),
-                token
-        );
+                LoginResponse response = new LoginResponse(
+                                user.getId(),
+                                user.getName(),
+                                user.getEmail(),
+                                user.getRole(),
+                                user.getStatus(),
+                                token);
 
-        return ResponseEntity.ok(response);
-    }
+                return ResponseEntity.ok(response);
+        }
 
-    @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<String> handleIllegalArgumentException(IllegalArgumentException ex) {
-        return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
-                .body(ex.getMessage());
-    }
+        @ExceptionHandler(IllegalArgumentException.class)
+        public ResponseEntity<String> handleIllegalArgumentException(IllegalArgumentException ex) {
+                return ResponseEntity
+                                .status(HttpStatus.BAD_REQUEST)
+                                .body(ex.getMessage());
+
+        @GetMapping("/me")
+        public ResponseEntity<String> getCurrentUser(
+                        org.springframework.security.core.Authentication authentication) {
+
+                String userId = authentication.getName();
+
+                return ResponseEntity.ok("Authenticated user ID: " + userId);
+        }
 }
