@@ -1,5 +1,6 @@
 package com.ridelink.account_service.security;
 
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -34,6 +35,13 @@ public class SecurityConfig {
                                                                 "/api/auth/login")
                                                 .permitAll()
                                                 .anyRequest().authenticated())
+
+                                .exceptionHandling(exceptions -> exceptions
+                                                .authenticationEntryPoint((request, response, authException) -> {
+                                                        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                                                        response.setContentType("application/json");
+                                                        response.getWriter().write("{\"error\": \"Unauthorized\", \"message\": \"" + authException.getMessage() + "\"}");
+                                                }))
 
                                 .formLogin(form -> form.disable())
                                 .httpBasic(basic -> basic.disable())

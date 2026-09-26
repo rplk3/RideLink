@@ -52,6 +52,10 @@ public class AccountService {
             throw new IllegalArgumentException("Invalid email or password");
         }
 
+        if (user.getStatus() == AccountStatus.SUSPENDED) {
+        throw new IllegalArgumentException("Account is suspended");
+    }
+
         return user;
     }
 }
