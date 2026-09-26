@@ -1,5 +1,8 @@
 package com.ridelink.account_service.service;
 
+import com.ridelink.account_service.exception.DuplicateEmailException;
+import com.ridelink.account_service.exception.InvalidCredentialsException;
+import com.ridelink.account_service.exception.SuspendedAccountException;
 import com.ridelink.account_service.dto.RegisterRequest;
 import com.ridelink.account_service.model.AccountStatus;
 import com.ridelink.account_service.model.User;
@@ -24,7 +27,7 @@ public class AccountService {
     public User registerUser(RegisterRequest request) {
 
         if (userRepository.existsByEmail(request.getEmail())) {
-            throw new IllegalArgumentException(
+            throw new DuplicateEmailException(
                     "Email is already registered"
             );
         }
@@ -45,17 +48,18 @@ public class AccountService {
     }
     public User authenticateUser(String email, String password) {
 
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid email or password"));
+    User user = userRepository.findByEmail(email)
+            .orElseThrow(() ->
+                    new InvalidCredentialsException("Invalid email or password"));
 
-        if (!passwordEncoder.matches(password, user.getPassword())) {
-            throw new IllegalArgumentException("Invalid email or password");
-        }
-
-        if (user.getStatus() == AccountStatus.SUSPENDED) {
-        throw new IllegalArgumentException("Account is suspended");
+    if (!passwordEncoder.matches(password, user.getPassword())) {
+        throw new InvalidCredentialsException("Invalid email or password");
     }
 
-        return user;
+    if (user.getStatus() == AccountStatus.SUSPENDED) {
+        throw new SuspendedAccountException("Account is suspended");
     }
+
+    return user;
+}
 }
