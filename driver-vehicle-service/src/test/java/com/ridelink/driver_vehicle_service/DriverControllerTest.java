@@ -12,6 +12,7 @@ import com.ridelink.driver_vehicle_service.dto.response.EligibleDriverResponse;
 import com.ridelink.driver_vehicle_service.enums.AvailabilityStatus;
 import com.ridelink.driver_vehicle_service.exception.DriverNotFoundException;
 import com.ridelink.driver_vehicle_service.exception.DuplicateAccountIdException;
+import com.ridelink.driver_vehicle_service.exception.InvalidDriverStateException;
 import com.ridelink.driver_vehicle_service.service.DriverService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -136,6 +137,23 @@ class DriverControllerTest {
                         .content(jsonMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.availabilityStatus").value("AVAILABLE"));
+    }
+
+    @Test
+    @DisplayName("7b. PATCH availability OFFLINE -> BUSY -> 409")
+    void updateDriverAvailability_InvalidTransition_Returns409() throws Exception {
+        AvailabilityUpdateRequest request = new AvailabilityUpdateRequest(AvailabilityStatus.BUSY);
+        when(driverService.updateDriverAvailability(eq("drv-1"), any(AvailabilityUpdateRequest.class)))
+                .thenThrow(new InvalidDriverStateException("Invalid availability transition from OFFLINE to BUSY"));
+
+        mockMvc.perform(patch("/api/drivers/drv-1/availability")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(jsonMapper.writeValueAsString(request)))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.status").value(409))
+                .andExpect(jsonPath("$.error").value("Conflict"))
+                .andExpect(jsonPath("$.message").value("Invalid availability transition from OFFLINE to BUSY"))
+                .andExpect(jsonPath("$.path").value("/api/drivers/drv-1/availability"));
     }
 
     @Test

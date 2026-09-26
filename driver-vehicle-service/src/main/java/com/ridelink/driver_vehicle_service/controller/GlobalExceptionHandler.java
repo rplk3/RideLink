@@ -5,6 +5,7 @@ import com.ridelink.driver_vehicle_service.exception.DriverNotFoundException;
 import com.ridelink.driver_vehicle_service.exception.DuplicateAccountIdException;
 import com.ridelink.driver_vehicle_service.exception.DuplicateLicenseNumberException;
 import com.ridelink.driver_vehicle_service.exception.DuplicateRegistrationNumberException;
+import com.ridelink.driver_vehicle_service.exception.InvalidDriverStateException;
 import com.ridelink.driver_vehicle_service.exception.VehicleNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
@@ -37,7 +38,8 @@ public class GlobalExceptionHandler {
     @ExceptionHandler({
             DuplicateAccountIdException.class,
             DuplicateLicenseNumberException.class,
-            DuplicateRegistrationNumberException.class
+            DuplicateRegistrationNumberException.class,
+            InvalidDriverStateException.class
     })
     @ResponseStatus(HttpStatus.CONFLICT)
     public ErrorResponse handleConflict(RuntimeException ex, HttpServletRequest request) {

@@ -11,6 +11,7 @@ import com.ridelink.driver_vehicle_service.enums.AvailabilityStatus;
 import com.ridelink.driver_vehicle_service.exception.DriverNotFoundException;
 import com.ridelink.driver_vehicle_service.exception.DuplicateAccountIdException;
 import com.ridelink.driver_vehicle_service.exception.DuplicateLicenseNumberException;
+import com.ridelink.driver_vehicle_service.exception.InvalidDriverStateException;
 import com.ridelink.driver_vehicle_service.model.Driver;
 import com.ridelink.driver_vehicle_service.model.Location;
 import com.ridelink.driver_vehicle_service.repository.DriverRepository;
@@ -140,6 +141,49 @@ class DriverServiceImplTest {
         DriverResponse response = driverService.updateDriverAvailability("drv-1", request);
 
         assertThat(response.getAvailabilityStatus()).isEqualTo(AvailabilityStatus.AVAILABLE);
+    }
+
+    @Test
+    @DisplayName("Update driver availability - invalid OFFLINE -> BUSY")
+    void updateDriverAvailability_InvalidOfflineToBusy() {
+        Driver driver = Driver.builder().id("drv-1").availabilityStatus(AvailabilityStatus.OFFLINE).build();
+        when(driverRepository.findById("drv-1")).thenReturn(Optional.of(driver));
+
+        AvailabilityUpdateRequest request = new AvailabilityUpdateRequest(AvailabilityStatus.BUSY);
+
+        InvalidDriverStateException exception = assertThrows(InvalidDriverStateException.class, 
+                () -> driverService.updateDriverAvailability("drv-1", request));
+
+        assertThat(exception.getMessage()).isEqualTo("Invalid availability transition from OFFLINE to BUSY");
+        verify(driverRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("Update driver availability - same-state AVAILABLE -> AVAILABLE allowed")
+    void updateDriverAvailability_SameStateAvailable() {
+        Driver driver = Driver.builder().id("drv-1").availabilityStatus(AvailabilityStatus.AVAILABLE).build();
+        when(driverRepository.findById("drv-1")).thenReturn(Optional.of(driver));
+        when(driverRepository.save(any(Driver.class))).thenReturn(driver);
+
+        AvailabilityUpdateRequest request = new AvailabilityUpdateRequest(AvailabilityStatus.AVAILABLE);
+        DriverResponse response = driverService.updateDriverAvailability("drv-1", request);
+
+        assertThat(response.getAvailabilityStatus()).isEqualTo(AvailabilityStatus.AVAILABLE);
+        verify(driverRepository).save(driver);
+    }
+
+    @Test
+    @DisplayName("Update driver availability - BUSY -> OFFLINE allowed")
+    void updateDriverAvailability_BusyToOffline() {
+        Driver driver = Driver.builder().id("drv-1").availabilityStatus(AvailabilityStatus.BUSY).build();
+        when(driverRepository.findById("drv-1")).thenReturn(Optional.of(driver));
+        when(driverRepository.save(any(Driver.class))).thenReturn(driver);
+
+        AvailabilityUpdateRequest request = new AvailabilityUpdateRequest(AvailabilityStatus.OFFLINE);
+        DriverResponse response = driverService.updateDriverAvailability("drv-1", request);
+
+        assertThat(response.getAvailabilityStatus()).isEqualTo(AvailabilityStatus.OFFLINE);
+        verify(driverRepository).save(driver);
     }
 
     @Test

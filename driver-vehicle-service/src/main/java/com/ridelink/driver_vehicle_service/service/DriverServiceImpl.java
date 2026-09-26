@@ -10,6 +10,7 @@ import com.ridelink.driver_vehicle_service.enums.AvailabilityStatus;
 import com.ridelink.driver_vehicle_service.exception.DriverNotFoundException;
 import com.ridelink.driver_vehicle_service.exception.DuplicateAccountIdException;
 import com.ridelink.driver_vehicle_service.exception.DuplicateLicenseNumberException;
+import com.ridelink.driver_vehicle_service.exception.InvalidDriverStateException;
 import com.ridelink.driver_vehicle_service.mapper.DriverMapper;
 import com.ridelink.driver_vehicle_service.model.Driver;
 import com.ridelink.driver_vehicle_service.repository.DriverRepository;
@@ -77,6 +78,11 @@ public class DriverServiceImpl implements DriverService {
     public DriverResponse updateDriverAvailability(String id, AvailabilityUpdateRequest request) {
         Driver driver = driverRepository.findById(id)
                 .orElseThrow(() -> new DriverNotFoundException("Driver not found with id: " + id));
+
+        if (driver.getAvailabilityStatus() == AvailabilityStatus.OFFLINE && 
+            request.getAvailabilityStatus() == AvailabilityStatus.BUSY) {
+            throw new InvalidDriverStateException("Invalid availability transition from OFFLINE to BUSY");
+        }
 
         driver.setAvailabilityStatus(request.getAvailabilityStatus());
 
